@@ -4,7 +4,8 @@
   (require rackunit))
 
 (provide parse-json-pointer
-         json-pointer?)
+         json-pointer?
+         expression->pointer)
 
 (require (only-in racket/contract
                   define/contract
