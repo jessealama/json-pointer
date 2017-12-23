@@ -17,7 +17,10 @@
          (only-in racket/list
                   empty?
                   empty
-                  rest))
+                  first
+                  rest)
+         (only-in (file "expr.rkt")
+                  json-pointer-expression?))
 
 (define/contract (unescape-tildes str)
   (-> string? string?)
@@ -56,7 +59,7 @@
   (check-true (json-pointer? "/m~0n")))
 
 (define/contract (parse-json-pointer str)
-  (-> json-pointer? (listof string?))
+  (-> json-pointer? json-pointer-expression?)
   (cond ((string=? "" str)
          empty)
         (else
@@ -70,3 +73,15 @@
   (check-equal? (list "frosch" "") (parse-json-pointer "/frosch/"))
   (check-equal? (list "~") (parse-json-pointer "/~0"))
   (check-equal? (list "/") (parse-json-pointer "/~1")))
+
+(define/contract (expression->pointer steps)
+  (-> json-pointer-expression? json-pointer?)
+  (if (empty? steps)
+      ""
+      (format "/~a~a" (first steps) (expression->pointer (rest steps)))))
+
+(module+ test
+  (check-equal? "" (expression->pointer (list)))
+  (check-equal? "/" (expression->pointer (list "")))
+  (check-equal? "/red/rum" (expression->pointer (list "red" "rum")))
+  (check-equal? "///" (expression->pointer (list "" "" ""))))

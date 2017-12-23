@@ -2,6 +2,7 @@
 
 (require (only-in racket/contract
                   define/contract
+                  or/c
                   ->)
          (only-in racket/list
                   empty?
@@ -21,7 +22,9 @@
                   array-ref)
          (only-in (file "parser.rkt")
                   parse-json-pointer
-                  json-pointer?))
+                  json-pointer?)
+         (only-in (file "expr.rkt")
+                  json-pointer-expression?))
 
 (provide json-pointer-value)
 
@@ -61,10 +64,16 @@
                 (error "A JSON object or array is needed." document))))))
 
 (define/contract (json-pointer-value jp doc)
-  (-> json-pointer? jsexpr? jsexpr?)
-  (unless (json-object? doc)
-    (error "Not a JSON object."))
-  (define steps (parse-json-pointer jp))
+  (-> (or/c json-pointer-expression? json-pointer?) jsexpr? jsexpr?)
+  (define steps
+    (cond ((json-pointer-expression? jp)
+           jp)
+          ((json-pointer? jp)
+           (parse-json-pointer jp))
+          (else
+           (raise-argument-error 'json-pointer-value
+                                 "(or/c json-pointer-expression? json-pointer?)"
+                                 jp))))
   (find-value steps doc))
 
 (module+ test
@@ -125,3 +134,18 @@ SAMPLE
   (check json-equal?
          (json-pointer-value "/m~0n" sample-doc/jsexpr)
          8))
+
+(module+ test
+  (let ([doc (list "foo" 3)])
+    (check-equal? "foo" (json-pointer-value "/0" doc))
+    (check-equal? 3 (json-pointer-value "/1" doc))
+    (check-exn exn:fail? (lambda () (json-pointer-value "/foo/bar" doc)))
+    (check-exn exn:fail? (lambda () (json-pointer-value "/3" doc)))
+    (check-equal? doc (json-pointer-value "" doc))))
+
+(module+ test
+  (let* ([jp "/foo/bar"]
+         [steps (parse-json-pointer jp)]
+         [doc (hasheq 'foo (hasheq 'bar #t))])
+    (check-equal? #t (json-pointer-value jp doc))
+    (check-equal? #t (json-pointer-value steps doc))))
