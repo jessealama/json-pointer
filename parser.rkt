@@ -21,20 +21,10 @@
                   first
                   rest)
          (only-in (file "expr.rkt")
-                  json-pointer-expression?))
-
-(define/contract (unescape-tildes str)
-  (-> string? string?)
-  (string-replace (string-replace str "~1" "/")
-                  "~0"
-                  "~"))
-
-(module+ test
-  (check-equal? "grue" (unescape-tildes "grue"))
-  (check-equal? "~" (unescape-tildes "~0"))
-  (check-equal? "/" (unescape-tildes "~1"))
-  (check-equal? "~/" (unescape-tildes "~0~1"))
-  (check-equal? "/~" (unescape-tildes "~1~0")))
+                  json-pointer-expression?)
+         (only-in (file "escape.rkt")
+                  escape-tildes
+                  unescape-tildes))
 
 (define/contract (json-pointer? x)
   (-> any/c boolean?)
@@ -79,10 +69,15 @@
   (-> json-pointer-expression? json-pointer?)
   (if (empty? steps)
       ""
-      (format "/~a~a" (first steps) (expression->pointer (rest steps)))))
+      (format "/~a~a" (escape-tildes (first steps)) (expression->pointer (rest steps)))))
 
 (module+ test
   (check-equal? "" (expression->pointer (list)))
   (check-equal? "/" (expression->pointer (list "")))
   (check-equal? "/red/rum" (expression->pointer (list "red" "rum")))
   (check-equal? "///" (expression->pointer (list "" "" ""))))
+
+(module+ test
+  ;; checking that we can deal with escaped characters
+  (check-equal? "/~0" (expression->pointer (list "~")))
+  (check-equal? "/~1" (expression->pointer (list "/"))))
