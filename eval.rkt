@@ -31,37 +31,34 @@
 (module+ test
   (require rackunit))
 
+(define/contract (refer-to/object step object)
+  (-> string? json-object? jsexpr?)
+  (property-value object step))
+
+(define/contract (refer-to/array step array)
+  (-> string? json-array? jsexpr?)
+  (cond ((string=? step "0")
+         (array-ref array 0))
+        ((regexp-match-exact? #px"[1-9][0-9]*" step)
+         (array-ref array (string->number step)))
+        ((string=? step "-")
+         (error "Minus character encountered."))
+        (else
+         (error (format "Cannot handle array index \"~a\" for current array." step) array))))
+
+(define/contract (refer-to step document)
+  (-> string? (or/c json-object? json-array?) jsexpr?)
+  (cond ((json-object? document)
+         (refer-to/object step document))
+        ((json-array? document)
+         (refer-to/array step document))))
+
 (define/contract (find-value steps document)
   (-> list? jsexpr? jsexpr?)
-  (cond ((empty? steps)
-         document)
-        (else
-         (define step (first steps))
-         (cond ((json-object? document)
-                (unless (has-property? document step)
-                  (error (format "Document does not have property \"~a\"." step)
-                         document))
-                (find-value (rest steps)
-                            (property-value document step)))
-               ((json-array? document)
-                (define len (array-length document))
-                (cond ((string=? step "0")
-                       (when (empty-array? document)
-                         (error "Empty array; cannot grab the 0th element."))
-                       (find-value (rest steps)
-                                   (array-ref document 0)))
-                      ((regexp-match-exact? #px"[1-9][0-9]*" step)
-                       (let ([index (string->number step)])
-                         (when (<= len index)
-                           (error (format "Index ~a out of bounds (array contains only ~a items)." index len) document))
-                         (find-value (rest steps)
-                                     (array-ref document index))))
-                      ((string=? step "-")
-                       (error "Minus character encountered."))
-                      (else
-                       (error (format "Cannot handle array index \"~a\" for current array." step) document))))
-               (else
-                (error "A JSON object or array is needed." document))))))
+  (if (empty? steps)
+      document
+      (find-value (rest steps)
+                  (refer-to (first steps) document))))
 
 (define/contract (json-pointer-value jp doc)
   (-> (or/c json-pointer-expression? json-pointer?) jsexpr? jsexpr?)
