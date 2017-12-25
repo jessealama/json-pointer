@@ -140,16 +140,16 @@
 
 (define/contract (json-equal-arrays? jsarr1 jsarr2)
   (-> json-array? json-array? boolean?)
-  (if (empty? jsarr1)
-      (empty? jsarr2)
-      (if (empty? jsarr2)
-          #f
-          (let ([a1 (first jsarr1)]
-                [b1 (first jsarr2)]
-                [as (rest jsarr1)]
-                [bs (rest jsarr2)])
-            (and (json-equal? a1 b1)
-                 (json-equal-arrays? as bs))))))
+  (cond ((empty? jsarr1)
+         (empty? jsarr2))
+        ((empty? jsarr2)
+         #f)
+        ((json-equal? (first jsarr1)
+                      (first jsarr2))
+         (json-equal-arrays? (rest jsarr1)
+                             (rest jsarr2)))
+        (else
+         #f)))
 
 (define/contract (remove-property jsobj prop)
   (-> json-object? symbol? json-object?)
