@@ -2,7 +2,7 @@
 
 (define collection "json-pointer")
 
-(define version "0.2")
+(define version "0.3")
 
 (define deps
   '("base"
