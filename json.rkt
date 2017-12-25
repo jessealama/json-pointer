@@ -22,7 +22,10 @@
                   empty?
                   first
                   rest)
-         racket/contract)
+         (only-in racket/contract
+                  define/contract
+                  ->
+                  or/c))
 
 (module+ test
   (require rackunit))
