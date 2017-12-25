@@ -62,16 +62,11 @@
 
 (define/contract (json-pointer-value jp doc)
   (-> (or/c json-pointer-expression? json-pointer?) jsexpr? jsexpr?)
-  (define steps
-    (cond ((json-pointer-expression? jp)
-           jp)
-          ((json-pointer? jp)
-           (parse-json-pointer jp))
-          (else
-           (raise-argument-error 'json-pointer-value
-                                 "(or/c json-pointer-expression? json-pointer?)"
-                                 jp))))
-  (find-value steps doc))
+  (find-value (cond ((json-pointer-expression? jp)
+                     jp)
+                    ((json-pointer? jp)
+                     (parse-json-pointer jp)))
+              doc))
 
 (module+ test
   (define sample-doc/str #<<SAMPLE

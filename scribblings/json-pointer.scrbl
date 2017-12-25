@@ -22,6 +22,10 @@ the JSON Pointer expression @tt{/foo} has the value @racket[5], whereas the expr
 
 Nothing terribly fancy is going on here: JSON Pointers are nothing more than Racket strings, and we work with @racket[jsexpr?] values.
 
-@include-section["interface.scrbl"]
+@include-section["expr.scrbl"]
+
+@include-section["parse.scrbl"]
+
+@include-section["eval.scrbl"]
 
 @include-section["license.scrbl"]

@@ -14,6 +14,7 @@
                   listof)
          (only-in racket/string
                   string-split
+                  string-prefix?
                   string-replace)
          (only-in racket/list
                   empty?
@@ -30,7 +31,7 @@
   (-> any/c boolean?)
   (and (string? x)
        (or (string=? "" x)
-           (regexp-match? #rx"^/" x))))
+           (string-prefix? x "/"))))
 
 (module+ test
   (check-false (json-pointer? " "))
@@ -58,7 +59,7 @@
               (rest (string-split str "/" #:trim? #f))))))
 
 (module+ test
-  (check-equal? (list) (parse-json-pointer ""))
+  (check-equal? empty (parse-json-pointer ""))
   (check-equal? (list "") (parse-json-pointer "/"))
   (check-equal? (list "frosch") (parse-json-pointer "/frosch"))
   (check-equal? (list "frosch" "") (parse-json-pointer "/frosch/"))
@@ -72,7 +73,7 @@
       (format "/~a~a" (escape-tildes (first steps)) (expression->pointer (rest steps)))))
 
 (module+ test
-  (check-equal? "" (expression->pointer (list)))
+  (check-equal? "" (expression->pointer empty))
   (check-equal? "/" (expression->pointer (list "")))
   (check-equal? "/red/rum" (expression->pointer (list "red" "rum")))
   (check-equal? "///" (expression->pointer (list "" "" ""))))
