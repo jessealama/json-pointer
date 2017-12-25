@@ -10,7 +10,7 @@ JSON Pointer is a straightforward notation for referring to values embedded with
 
 the JSON Pointer expression `/foo` has the value `5`, whereas the expressions `/bar/0` and `/bar/1` have the values `1` and `2`, respectively.
 
-JSON Pointer is an IETF standard [rfc](RFC 6901).
+JSON Pointer is an IETF standard [RFC 6901][rfc].
 
 Exports
 ----------
