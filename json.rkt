@@ -1,33 +1,44 @@
 #lang racket/base
 
-(require (only-in json
-                  jsexpr?))
+(provide json-object?
+         json-string?
+         json-null?
+         json-boolean?
+         json-array?
+         array-items
+         array-ref
+         array-length
+         json-number?
+         has-property?
+         property-value
+         empty-array?
+         object-properties
+         remove-property
+         json-equal?)
 
-(require (only-in racket/list
+(require (only-in json
+                  jsexpr?)
+         (only-in racket/list
                   empty?
                   first
-                  rest))
+                  rest)
+         racket/contract)
 
 (module+ test
   (require rackunit))
 
-;; assumes that x is alredy a jsexpr? value
-(define (json-object? x)
+(define/contract (json-object? x)
+  (-> jsexpr? boolean?)
   (hash? x))
 
-(provide json-object?)
-
-;; assumes that x is already a jsexpr? value
-(define (json-string? x)
+(define/contract (json-string? x)
+  (-> jsexpr? boolean?)
   (string? x))
 
-(provide json-string?)
-
 ;; assumes that x is already a jsexpr? value
-(define (json-null? x)
+(define/contract (json-null? x)
+  (-> jsexpr? boolean?)
   (eq? x 'null))
-
-(provide json-null?)
 
 (module+ test
   (test-case "JSON null"
@@ -38,49 +49,32 @@
     (check-false (json-null? 0))
     (check-false (json-null? #f))))
 
-;; assumes that x is already a jsexpr? value
-(define (json-boolean? x)
+(define/contract (json-boolean? x)
+  (-> jsexpr? boolean?)
   (boolean? x))
 
-(provide json-boolean?)
-
-(define (json-true-value? x)
-  (eq? x #t))
-
-(provide json-true-value?)
-
-(define (json-false-value? x)
-  (eq? x #f))
-
-(provide json-false-value?)
-
-;; assumes that x is already a jsexpr? value
-(define (json-array? x)
+(define/contract (json-array? x)
+  (-> jsexpr? boolean?)
   (list? x))
-
-(provide json-array?)
 
 (module+ test
   (check-true (json-array? (list)))
   (check-false (json-array? (hasheq))))
 
-(define (array-items arr)
+(define/contract (array-items arr)
+  (-> json-array? list?)
   arr)
 
-(provide array-items)
-
-(define (array-ref arr idx)
+(define/contract (array-ref arr idx)
+  (-> json-array? exact-integer? jsexpr?)
   (list-ref (array-items arr) idx))
 
-(provide array-ref)
-
-(define (array-length arr)
+(define/contract (array-length arr)
+  (-> json-array? exact-nonnegative-integer?)
   (length (array-items arr)))
 
-(provide array-length)
-
-;; assumes that x is already a jsexpr? value
-(define (json-number? x)
+(define/contract (json-number? x)
+  (-> jsexpr? boolean?)
   (real? x))
 
 (module+ test
@@ -90,9 +84,8 @@
   (check-true (json-number? -4.5))
   (check-true (json-number? 3.141592653589793238462643383279)))
 
-(provide json-number?)
-
-(define (json-integer? x)
+(define/contract (json-integer? x)
+  (-> jsexpr? boolean?)
   (integer? x))
 
 (module+ test
@@ -103,13 +96,12 @@
      (check-false (json-integer? 4.1))
      (check-false (json-integer? #t))))
 
-(define (has-property? obj prop)
+(define/contract (has-property? obj prop)
+  (-> json-object? (or/c symbol? string?) boolean?)
   (cond ((symbol? prop)
          (hash-has-key? obj prop))
         ((string? prop)
-         (hash-has-key? obj (string->symbol prop)))
-        (else
-         #f)))
+         (hash-has-key? obj (string->symbol prop)))))
 
 (module+ test
   (let ([obj (hasheq
@@ -120,23 +112,16 @@
     (check-false (has-property? obj 'bar))
     (check-false (has-property? obj "bar"))))
 
-(provide has-property?)
-
-(define (property-value obj prop)
+(define/contract (property-value obj prop)
+  (-> json-object? (or/c symbol? string?) jsexpr?)
   (cond ((symbol? prop)
          (hash-ref obj prop))
         ((string? prop)
-         (hash-ref obj (string->symbol prop)))
-        (else
-         (error "Property should be either a symbol or a string." prop))))
+         (hash-ref obj (string->symbol prop)))))
 
-(provide property-value)
-
-;; assumes x is a json-array? value
-(define (empty-array? x)
+(define/contract (empty-array? x)
+  (-> json-array? boolean?)
   (empty? x))
-
-(provide empty-array?)
 
 (module+ test
   (test-case "Basic JSON object check"
@@ -146,23 +131,12 @@
     (check-true (json-object? (hasheq)))
     (check-true (json-object? (hasheq 'type "object")))))
 
-(define (object-properties obj)
+(define/contract (object-properties obj)
+  (-> json-object? list?)
   (hash-keys obj))
 
-(provide object-properties)
-
-(define (object-values obj)
-  (hash-values obj))
-
-(provide object-values)
-
-(define (json-non-negative-integer? x)
-  (and (json-integer? x)
-       (<= 0 x)))
-
-(provide json-non-negative-integer?)
-
-(define (json-equal-arrays? jsarr1 jsarr2)
+(define/contract (json-equal-arrays? jsarr1 jsarr2)
+  (-> json-array? json-array? boolean?)
   (if (empty? jsarr1)
       (empty? jsarr2)
       (if (empty? jsarr2)
@@ -174,12 +148,12 @@
             (and (json-equal? a1 b1)
                  (json-equal-arrays? as bs))))))
 
-(define (remove-property jsobj prop)
+(define/contract (remove-property jsobj prop)
+  (-> json-object? symbol? json-object?)
   (hash-remove jsobj prop))
 
-(provide remove-property)
-
-(define (json-equal-objects? jsobj1 jsobj2)
+(define/contract (json-equal-objects? jsobj1 jsobj2)
+  (-> json-object? json-object? boolean?)
   (let ([props1 (object-properties jsobj1)])
     (if (empty? props1)
         (empty? (object-properties jsobj2))
@@ -191,8 +165,8 @@
                       (json-equal? (remove-property jsobj1 prop1)
                                    (remove-property jsobj2 prop1)))))))))
 
-;; assumes that both arguments as jsexpr? values
-(define (json-equal? js1 js2)
+(define/contract (json-equal? js1 js2)
+  (-> jsexpr? jsexpr? boolean?)
   (cond ((json-null? js1)
          (json-null? js2))
         ((json-string? js1)
@@ -213,10 +187,7 @@
         (else
          (error "Unknown type: Don't know how to deal with ~a." js1))))
 
-(provide json-equal?)
-
 (module+ test
-
   (test-case "Null equality"
     (check-true (json-equal? 'null 'null))
     (check-false (json-equal? 'null "null")))
@@ -279,30 +250,3 @@
                               (list "b" "a")))
     (check-true (json-equal? (list (list "a" "b"))
                              (list (list "a" "b"))))))
-
-(define (count-properties js)
-  (length (object-properties js)))
-
-(provide count-properties)
-
-(define (has-type? data type)
-  (unless (string? type)
-    (error "Type should be a string: " type))
-  (cond ((string=? type "null")
-         (json-null? data))
-        ((string=? type "boolean")
-         (json-boolean? data))
-        ((string=? type "number")
-         (json-number? data))
-        ((string=? type "integer")
-         (json-integer? data))
-        ((string=? type "object")
-         (json-object? data))
-        ((string=? type "array")
-         (json-array? data))
-        ((string=? type "string")
-         (json-string? data))
-        (else
-         (error "Unknown JSON data type: " type))))
-
-(provide has-type?)
