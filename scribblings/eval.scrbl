@@ -14,7 +14,7 @@ jsexpr?]
 
 Given a JSON Pointer and a JSON document, evaluate the JSON Pointer within the document. The result is a @racket[jsexpr?], if all goes well.
 
-(For the first argument both @racket[json-pointer?]—a string—as well as a @racket[json-pointer-expression]—a listof strings—are allowed. When given a @racket[json-pointer?], it will be parsed into a @racket[json-pointer-expression?].)
+(For the first argument both @racket[json-pointer?]—a string—as well as a @racket[json-pointer-expression?]—a list of strings—are allowed. When given a @racket[json-pointer?], it will be parsed into a @racket[json-pointer-expression?], with which the real computation takes place.)
 
 If things @emph{don’t} go well, @racket[json-pointer-value] function throws an exception (of type @racket[exn:fail?]). These are the conditions under which evaluation might go awry:
 
