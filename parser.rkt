@@ -1,8 +1,5 @@
 #lang racket/base
 
-(module+ test
-  (require rackunit))
-
 (provide parse-json-pointer
          json-pointer?
          expression->pointer)
@@ -26,6 +23,9 @@
          (only-in (file "escape.rkt")
                   escape-tildes
                   unescape-tildes))
+
+(module+ test
+  (require rackunit))
 
 (define/contract (json-pointer? x)
   (-> any/c boolean?)
