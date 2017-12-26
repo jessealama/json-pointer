@@ -1,6 +1,8 @@
 json-pointer
 ============
 
+    raco pkg install json-pointer
+
 JSON Pointer is a straightforward notation for referring to values embedded within a JSON document. Given a JSON object like this:
 
     {
