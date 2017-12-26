@@ -1,5 +1,7 @@
 #lang racket/base
 
+(provide json-pointer-value)
+
 (require (only-in racket/contract
                   define/contract
                   or/c
@@ -25,8 +27,6 @@
                   json-pointer?)
          (only-in (file "expr.rkt")
                   json-pointer-expression?))
-
-(provide json-pointer-value)
 
 (module+ test
   (require rackunit))
