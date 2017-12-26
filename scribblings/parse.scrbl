@@ -15,9 +15,7 @@ json-pointer-expression?]
 
 Given a JSON Pointer, produce a JSON Pointer expression.
 
-The computation always succeeds (that is, no exception will be thrown).
-
-What about going the other way around? You can do that, too:
+What about going the other way around? Can you render a “semantic” JSON Pointer expression into a “syntactic” JSON Pointer? Yes, you can:
 
 @defproc[
 (expression->pointer
@@ -26,5 +24,3 @@ json-pointer?
 ]
 
 Given a JSON Pointer expression, produce a JSON Pointer.
-
-The computation always succeeds (no exception will be thrown, unless, well, something really weird happens).
