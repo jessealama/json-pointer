@@ -7,7 +7,8 @@
          json-number?
          has-property?
          property-value
-         object-properties)
+         object-properties
+         json-value?)
 
 (require (only-in json
                   jsexpr?)
@@ -74,7 +75,7 @@
     (check-false (has-property? obj "bar"))))
 
 (define/contract (property-value obj prop)
-  (-> json-object? (or/c symbol? string?) jsexpr?)
+  (-> json-object? (or/c symbol? string?) json-value?)
   (cond [(symbol? prop)
          (hash-ref obj prop)]
         [(string? prop)
