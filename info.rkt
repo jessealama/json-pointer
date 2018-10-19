@@ -14,7 +14,7 @@
     "racket-doc"
     "rackunit-lib"))
 
-(define pkg-desc "json-pointer provides functions for parsing and evaluating JSON Pointers (IETF RFC 6901).")
+(define pkg-desc "Parse and evaluating JSON Pointers (IETF RFC 6901).")
 
 (define pkg-authors '("jesse@lisp.sh"))
 
