@@ -68,7 +68,6 @@
 
 (module+ test
   (let ([obj (hasheq 'foo "bar")])
-    (check-true (jsexpr? obj))
     (check-true (has-property? obj 'foo))
     (check-true (has-property? obj "foo"))
     (check-false (has-property? obj 'bar))
