@@ -6,6 +6,8 @@
                   define/contract
                   or/c
                   ->)
+         (only-in ejs
+                  equal-ejsexprs?)
          (only-in racket/list
                   empty?
                   first
@@ -18,7 +20,6 @@
                   json-object?
                   json-array?
                   array-length
-                  empty-array?
                   has-property?
                   property-value
                   array-ref)
@@ -86,45 +87,45 @@ SAMPLE
     ))
 
 (module+ test
-  (define sample-doc/jsexpr
-    (bytes->jsexpr (string->bytes/utf-8 sample-doc/str)))
-  (require (only-in (file "json.rkt")
-                    json-equal?))
-  (check json-equal?
-         (json-pointer-value "" sample-doc/jsexpr)
-         sample-doc/jsexpr)
-  (check json-equal?
-         (json-pointer-value "/foo" sample-doc/jsexpr)
+  (require (only-in ejs
+                    string->ejsexpr))
+  (define sample-doc/ejsexpr (string->ejsexpr sample-doc/str))
+  (displayln sample-doc/ejsexpr)
+  (check equal-ejsexprs?
+         (json-pointer-value "" sample-doc/ejsexpr)
+         sample-doc/ejsexpr)
+  (check equal-ejsexprs?
+         (json-pointer-value "/foo" sample-doc/ejsexpr)
          (list "bar" "baz"))
-  (check json-equal?
-         (json-pointer-value "/foo/0" sample-doc/jsexpr)
+  (check equal-ejsexprs?
+         (json-pointer-value "/foo/0" sample-doc/ejsexpr)
          "bar")
-  (check json-equal?
-         (json-pointer-value "/" sample-doc/jsexpr)
+  (check equal-ejsexprs?
+         (json-pointer-value "/" sample-doc/ejsexpr)
          0)
-  (check json-equal?
-         (json-pointer-value "/a~1b" sample-doc/jsexpr)
+  (check equal-ejsexprs?
+         (json-pointer-value "/a~1b" sample-doc/ejsexpr)
          1)
-  (check json-equal?
-         (json-pointer-value "/c%d" sample-doc/jsexpr)
+  (check equal-ejsexprs?
+         (json-pointer-value "/c%d" sample-doc/ejsexpr)
          2)
-  (check json-equal?
-         (json-pointer-value "/e^f" sample-doc/jsexpr)
+  (check equal-ejsexprs?
+         (json-pointer-value "/e^f" sample-doc/ejsexpr)
          3)
-  (check json-equal?
-         (json-pointer-value "/g|h" sample-doc/jsexpr)
+  (check equal-ejsexprs?
+         (json-pointer-value "/g|h" sample-doc/ejsexpr)
          4)
-  (check json-equal?
-         (json-pointer-value "/i\\j" sample-doc/jsexpr)
+  (check equal-ejsexprs?
+         (json-pointer-value "/i\\j" sample-doc/ejsexpr)
          5)
-  (check json-equal?
-         (json-pointer-value "/k\"l" sample-doc/jsexpr)
+  (check equal-ejsexprs?
+         (json-pointer-value "/k\"l" sample-doc/ejsexpr)
          6)
-  (check json-equal?
-         (json-pointer-value "/ " sample-doc/jsexpr)
+  (check equal-ejsexprs?
+         (json-pointer-value "/ " sample-doc/ejsexpr)
          7)
-  (check json-equal?
-         (json-pointer-value "/m~0n" sample-doc/jsexpr)
+  (check equal-ejsexprs?
+         (json-pointer-value "/m~0n" sample-doc/ejsexpr)
          8))
 
 (module+ test

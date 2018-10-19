@@ -6,7 +6,8 @@
 
 (define deps
   '("base"
-    "rackunit-lib"))
+    "rackunit-lib"
+    "ejs"))
 
 (define build-deps
   '("scribble-lib"
