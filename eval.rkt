@@ -90,7 +90,6 @@ SAMPLE
   (require (only-in ejs
                     string->ejsexpr))
   (define sample-doc/ejsexpr (string->ejsexpr sample-doc/str))
-  (displayln sample-doc/ejsexpr)
   (check equal-ejsexprs?
          (json-pointer-value "" sample-doc/ejsexpr)
          sample-doc/ejsexpr)
