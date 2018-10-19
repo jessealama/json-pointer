@@ -6,23 +6,19 @@
                   define/contract
                   or/c
                   ->)
-         (only-in ejs
-                  equal-ejsexprs?)
          (only-in racket/list
                   empty?
                   first
                   second
                   rest)
-         (only-in json
-                  jsexpr?
-                  bytes->jsexpr)
          (only-in (file "json.rkt")
                   json-object?
                   json-array?
                   array-length
                   has-property?
                   property-value
-                  array-ref)
+                  array-ref
+                  json-value?)
          (only-in (file "parser.rkt")
                   parse-json-pointer
                   json-pointer?)
@@ -33,11 +29,11 @@
   (require rackunit))
 
 (define/contract (refer-to/object step object)
-  (-> string? json-object? jsexpr?)
+  (-> string? json-object? json-value?)
   (property-value object step))
 
 (define/contract (refer-to/array step array)
-  (-> string? json-array? jsexpr?)
+  (-> string? json-array? json-value?)
   (cond ((string=? step "0")
          (array-ref array 0))
         ((regexp-match-exact? #px"[1-9][0-9]*" step)
@@ -48,21 +44,21 @@
          (error (format "Cannot handle array index \"~a\" for current array." step) array))))
 
 (define/contract (refer-to step document)
-  (-> string? (or/c json-object? json-array?) jsexpr?)
+  (-> string? (or/c json-object? json-array?) json-value?)
   (cond ((json-object? document)
          (refer-to/object step document))
         ((json-array? document)
          (refer-to/array step document))))
 
 (define/contract (find-value steps document)
-  (-> list? jsexpr? jsexpr?)
+  (-> list? json-value? json-value?)
   (if (empty? steps)
       document
       (find-value (rest steps)
                   (refer-to (first steps) document))))
 
 (define/contract (json-pointer-value jp doc)
-  (-> (or/c json-pointer-expression? json-pointer?) jsexpr? jsexpr?)
+  (-> (or/c json-pointer-expression? json-pointer?) json-value? json-value?)
   (find-value (cond ((json-pointer-expression? jp)
                      jp)
                     ((json-pointer? jp)
@@ -88,7 +84,8 @@ SAMPLE
 
 (module+ test
   (require (only-in ejs
-                    string->ejsexpr))
+                    string->ejsexpr
+                    equal-ejsexprs?))
   (define sample-doc/ejsexpr (string->ejsexpr sample-doc/str))
   (check equal-ejsexprs?
          (json-pointer-value "" sample-doc/ejsexpr)
