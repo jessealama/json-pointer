@@ -21,6 +21,14 @@
 (module+ test
   (require rackunit))
 
+(define (json-value? x)
+  (or (json-null? x)
+      (json-string? x)
+      (json-number? x)
+      (json-boolean? x)
+      (json-array? x)
+      (json-object? x)))
+
 (define (json-null? x)
   (eq? x 'null))
 
@@ -87,14 +95,6 @@
     (check-false (json-object? (list)))
     (check-true (json-object? (hasheq)))
     (check-true (json-object? (hasheq 'type "object")))))
-
-(define (json-value? x)
-  (or (json-null? x)
-      (json-string? x)
-      (json-number? x)
-      (json-boolean? x)
-      (json-array? x)
-      (json-object? x)))
 
 (define/contract (object-properties obj)
   (json-object? . -> . (listof json-value?))
