@@ -1,6 +1,7 @@
 #lang racket/base
 
-(provide json-pointer-value)
+(provide json-pointer-value
+         json-pointer-refers?)
 
 (require (only-in racket/contract
                   define/contract
