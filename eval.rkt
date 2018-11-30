@@ -11,6 +11,8 @@
                   first
                   second
                   rest)
+         (only-in racket/function
+                  const)
          (only-in (file "json.rkt")
                   json-object?
                   json-array?
@@ -138,3 +140,20 @@ SAMPLE
          [doc (hasheq 'foo (hasheq 'bar #t))])
     (check-equal? #t (json-pointer-value jp doc))
     (check-equal? #t (json-pointer-value steps doc))))
+
+(define/contract (json-pointer-refers? jp doc)
+  (-> (or/c json-pointer-expression? json-pointer?) json-value? boolean?)
+  (with-handlers ([exn:fail? (const #f)])
+    (begin0
+        #t
+      (json-pointer-value jp doc))))
+
+(module+ test
+  (let* ([jp "/hi"])
+    (check-false (json-pointer-refers? jp (list)))
+    (check-false (json-pointer-refers? jp (list "hi")))
+    (check-false (json-pointer-refers? jp (hasheq)))
+    (check-true (json-pointer-refers? jp (hasheq 'hi "there")))
+    (check-false (json-pointer-refers? jp "WTF?"))
+    (check-false (json-pointer-refers? jp 'null))
+    (check-false (json-pointer-refers? jp 123))))
