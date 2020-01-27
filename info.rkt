@@ -2,7 +2,7 @@
 
 (define collection "json-pointer")
 
-(define version "0.6.0")
+(define version "0.7.0")
 
 (define deps
   '("base"
@@ -14,7 +14,7 @@
     "racket-doc"
     "rackunit-lib"))
 
-(define pkg-desc "Parse and evaluating JSON Pointers (IETF RFC 6901).")
+(define pkg-desc "Parse and evaluate JSON Pointers (IETF RFC 6901).")
 
 (define pkg-authors '("jesse@lisp.sh"))
 
