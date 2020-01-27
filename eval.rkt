@@ -37,14 +37,15 @@
 
 (define/contract (refer-to/array step array)
   (-> string? json-array? json-value?)
-  (cond ((string=? step "0")
-         (array-ref array 0))
-        ((regexp-match-exact? #px"[1-9][0-9]*" step)
-         (array-ref array (string->number step)))
-        ((string=? step "-")
-         (error "Minus character encountered."))
-        (else
-         (error (format "Cannot handle array index \"~a\" for current array." step) array))))
+  (cond [(string=? step "0")
+         (array-ref array 0)]
+        [(regexp-match-exact? #px"[1-9][0-9]*" step)
+         (array-ref array (string->number step))]
+        [(regexp-match-exact? #px"[-][1-9][0-9]*" step)
+         (array-ref array (+ (length array)
+                             (string->number step)))]
+        [else
+         (error (format "Cannot handle array index \"~a\" for current array." step) array)]))
 
 (define/contract (refer-to step document)
   (-> string? (or/c json-object? json-array?) json-value?)
@@ -126,6 +127,15 @@ SAMPLE
   (check equal-ejsexprs?
          (json-pointer-value "/m~0n" sample-doc/ejsexpr)
          8))
+
+;; check negative references
+(module+ test
+  (check-equal? (json-pointer-value "/-1" (list "a" "b"))
+                "b")
+  (check-equal? (json-pointer-value "/-2" (list "a" "b"))
+                "a")
+  (check-equal? (json-pointer-value "/-1" (list 5))
+                5))
 
 (module+ test
   (let ([doc (list "foo" 3)])
