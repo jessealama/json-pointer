@@ -24,4 +24,4 @@ boolean?]
 
 Returns @racket[#t] iff @tt{x} is a list of strings.
 
-There are essentially no constraints. The list might be empty. The strings in the list may themselves be empty, too. Dupliates are allowed.
+There are essentially no constraints. The list might be empty. The strings in the list may themselves be empty, too. Duplicates are allowed.
