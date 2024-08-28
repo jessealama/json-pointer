@@ -16,6 +16,6 @@
 
 (define pkg-desc "Parse and evaluate JSON Pointers (IETF RFC 6901).")
 
-(define pkg-authors '("jesse@lisp.sh"))
+(define pkg-authors '("jesse@serverracket.com"))
 
 (define scribblings '(("scribblings/json-pointer.scrbl" ())))
